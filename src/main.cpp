@@ -75,10 +75,13 @@ void autonomous() {}
  */
 void opcontrol() {
 	Controller master(E_CONTROLLER_MASTER);
+	
 	MotorGroup right_mg({-13,-14});
 	MotorGroup left_mg({-3,-4});  
 	
-
+	right_mg.set_gearing(E_MOTOR_GEAR_BLUE);
+	left_mg.set_gearing(E_MOTOR_GEAR_BLUE);
+	
 	while (true) {
 		// Tank Drive
 
@@ -93,7 +96,6 @@ void opcontrol() {
         left_mg.move(power + turn);
         right_mg.move(power - turn);
 		*/
-		
 		
 		
 		delay(20);                               

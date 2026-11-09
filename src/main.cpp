@@ -1,5 +1,18 @@
 #include "main.h"
+// Left side
+pros::Motor leftFront(-2);
+pros::Motor leftBack(-11);
 
+// Right side
+pros::Motor rightFront(14);
+pros::Motor rightBack(13);
+
+pros::MotorGroup lift({15, -16});
+
+pros::adi::DigitalOut claw('B');
+
+bool clawOpen = false;
+bool lastL1State = false;
 /**
  * A callback function for LLEMU's center button.
  *
@@ -58,7 +71,9 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+    
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -74,30 +89,40 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	Controller master(E_CONTROLLER_MASTER);
-	
-	MotorGroup right_mg({-13,-14});
-	MotorGroup left_mg({-3,-4});  
-	
-	right_mg.set_gearing(E_MOTOR_GEAR_BLUE);
-	left_mg.set_gearing(E_MOTOR_GEAR_BLUE);
-	
-	while (true) {
-		// Tank Drive
+	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-		left_mg.move(master.get_analog(ANALOG_LEFT_Y));
-		right_mg.move(master.get_analog(ANALOG_RIGHT_Y));
+    while (true) {
 
-		// Split Arcade Drive
-		/*
-		int power = master.get_analog(ANALOG_LEFT_Y);
-        int turn  = master.get_analog(ANALOG_RIGHT_X);
+        // Drive
+        int forward = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-        left_mg.move(power + turn);
-        right_mg.move(power - turn);
-		*/
-		
-		
-		delay(20);                               
+        leftFront.move(forward + turn);
+        leftBack.move(forward + turn);
+
+        rightFront.move(forward - turn);
+        rightBack.move(forward - turn);
+
+        // Lift
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+            lift.move(127);
+        }
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+            lift.move(-127);
+        }
+        else {
+            lift.move(0);
+        }
+		// Toggle claw with L1
+	bool currentL1State = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
+
+	if (currentL1State && !lastL1State) {
+    	clawOpen = !clawOpen;      // Flip state
+    	claw.set_value(clawOpen);  // Set piston
 	}
+
+	lastL1State = currentL1State;
+
+        pros::delay(20);
+    }
 }

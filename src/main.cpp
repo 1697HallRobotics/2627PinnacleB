@@ -40,6 +40,8 @@ void initialize() {
 	lcd::set_text(1, "Hello PROS User!");
 
 	lcd::register_btn1_cb(on_center_button);
+
+    lift.set_brake_mode_all(MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -75,6 +77,7 @@ void autonomous() {
     
 }
 
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -90,19 +93,30 @@ void autonomous() {
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-
+    pros::Distance grabby(9);
+    bool cangrab = true;
+    int waitforit = 1;
     while (true) {
 
         // Drive
         int forward = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-
+        
+        
         leftFront.move(forward + turn);
         leftBack.move(forward + turn);
 
         rightFront.move(forward - turn);
         rightBack.move(forward - turn);
 
+        //check to close claw
+        
+        if ((grabby.get() <= 10) && (clawOpen) && (waitforit > 50)) {
+            claw.set_value(false);
+            waitforit = 0;
+        }
+
+        waitforit++;
         // Lift
         if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
             lift.move(127);
@@ -119,10 +133,11 @@ void opcontrol() {
 	if (currentL1State && !lastL1State) {
     	clawOpen = !clawOpen;      // Flip state
     	claw.set_value(clawOpen);  // Set piston
+        waitforit = 0;
 	}
 
 	lastL1State = currentL1State;
-
+    
         pros::delay(20);
     }
 }

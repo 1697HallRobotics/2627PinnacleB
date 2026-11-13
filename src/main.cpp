@@ -8,9 +8,11 @@ pros::Motor rightFront(14);
 pros::Motor rightBack(13);
 
 pros::MotorGroup lift({15, -16});
-
+pros::MotorGroup everything({-2, -11, 14, 13});
 pros::adi::DigitalOut claw('B');
-
+pros::adi::DigitalIn limit('D');
+pros::MotorGroup leftSide({-2, -11});
+pros::MotorGroup rightSide({14, 13});
 bool clawOpen = false;
 bool lastL1State = false;
 /**
@@ -74,8 +76,15 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+    everything.tare_position();
+    everything.move_absolute(250, 100);
+    everything.brake();
+    pros::delay(500);
+    leftSide.move_absolute(250,100);
+
+    claw.set_value(false);
     
-}
+    }
 
 
 /**
@@ -95,6 +104,7 @@ void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
     pros::Distance grabby(9);
     bool cangrab = true;
+    bool canSense = true;
     int waitforit = 1;
     while (true) {
 
@@ -111,7 +121,7 @@ void opcontrol() {
 
         //check to close claw
         
-        if ((grabby.get() <= 10) && (clawOpen) && (waitforit > 50)) {
+        if ((grabby.get() <= 10) && (clawOpen) && (waitforit > 50) && (canSense)) {
             claw.set_value(false);
             waitforit = 0;
         }
@@ -121,11 +131,14 @@ void opcontrol() {
         if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
             lift.move(127);
         }
-        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !(limit.get_value())) {
             lift.move(-127);
         }
         else {
             lift.move(0);
+        }
+        if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
+            canSense = !canSense;
         }
 		// Toggle claw with L1
 	bool currentL1State = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1);

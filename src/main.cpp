@@ -82,13 +82,40 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-    everything.tare_position();
-    pros::delay(500);
-    everything.move_absolute(250, 100);
-    pros::delay(500);
-    leftSide.move_absolute(250,100);
-    claw.set_value(false);
+    everything.move_velocity(90);
+    lift.move_velocity(90);
+    pros::delay(800);
+    everything.move_velocity(0);
+    lift.move_velocity(0);
+    pros::delay(1000);
+    lift.move_velocity(-65);
+    pros::delay(1000);
+    lift.move_velocity(0);
+    claw.set_value(true); //drop off pin 
     
+    everything.move_velocity(-70);
+    pros::delay(500);
+    everything.move_velocity(0);
+    rightSide.move_velocity(50);
+    pros::delay(500);
+    rightSide.move_velocity(0);
+    everything.move_velocity(100);
+    pros::delay(1200);
+    everything.move_velocity(0);
+    leftSide.move_velocity(-50);
+    pros::delay(400);
+    leftSide.move_velocity(0);   //this whole section sets up to flip the toggle
+
+
+    everything.move_velocity(-127);
+    pros::delay(2000);
+    everything.move_velocity(70);
+    pros::delay(500);
+    everything.move_velocity(0);
+    everything.move_velocity(-127);
+    pros::delay(500);
+    everything.move_velocity(0); //flips toggle (hopfully... its 50/50)
+
     }
 
 
@@ -145,9 +172,21 @@ void opcontrol() {
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
             canSense = !canSense;
         }
-		// Toggle claw with L1
-	bool currentL1State = (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1 || master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)));
+        if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
+            lift.move_velocity(127);
+            pros::delay(750);
+            lift.move_velocity(0);
 
+        }
+        if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN) && !(limit.get_value())) {
+            lift.move_velocity(-127);
+            pros::delay(500);
+            lift.move_velocity(0);
+
+        }
+		// Toggle claw with L1
+	bool currentL1State = (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1) || master.get_digital(pros::E_CONTROLLER_DIGITAL_A));
+        
 	if (currentL1State && !lastL1State) {
     	clawOpen = !clawOpen;      // Flip state
     	claw.set_value(clawOpen);  // Set piston

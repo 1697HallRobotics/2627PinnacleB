@@ -146,7 +146,7 @@ void opcontrol() {
             canSense = !canSense;
         }
 		// Toggle claw with L1
-	bool currentL1State = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1 || master.get_digital(pros::E_CONTROLLER_DIGITAL_UP));
+	bool currentL1State = (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1 || master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)));
 
 	if (currentL1State && !lastL1State) {
     	clawOpen = !clawOpen;      // Flip state

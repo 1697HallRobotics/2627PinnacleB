@@ -87,7 +87,7 @@ void autonomous() {
     pros::delay(800);
     everything.move_velocity(0);
     lift.move_velocity(0);
-    pros::delay(1000);
+    pros::delay(1000); 
     lift.move_velocity(-65);
     pros::delay(1000);
     lift.move_velocity(0);
@@ -105,7 +105,7 @@ void autonomous() {
     leftSide.move_velocity(-50);
     pros::delay(400);
     leftSide.move_velocity(0);   //this whole section sets up to flip the toggle
-
+    
 
     everything.move_velocity(-127);
     pros::delay(2000);
@@ -115,8 +115,7 @@ void autonomous() {
     everything.move_velocity(-127);
     pros::delay(500);
     everything.move_velocity(0); //flips toggle (hopfully... its 50/50)
-
-    }
+}
 
 
 /**
@@ -142,7 +141,7 @@ void opcontrol() {
 
         // Drive
         int forward = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int turn = (master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)) / 2;
         
         
         leftFront.move(forward + turn);
